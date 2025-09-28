@@ -168,4 +168,4 @@ render_history()
 with st.container():
     user_input = st.text_area("메시지를 입력하세요", height=80, key="user_input", placeholder="Shift+Enter 로 줄바꿈")
     col1, col2 = st.columns([0.8, 0.2])
-    with col2
+    with col2:
