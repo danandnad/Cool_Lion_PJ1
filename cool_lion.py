@@ -1,13 +1,23 @@
 import streamlit as st
 from google import genai
-from google.genai import types
 import traceback
 import datetime
 import json
 import os
 
-api_key = os.environ.get("GEMINI_API_KEY") or st.secrets.get("GEMINI_API_KEY")
-genai.configure(api_key=api_key)
+# --- API 키 설정 (여러 방법으로 시도) ---
+def get_api_key():
+    # 1. 직접 환경변수에서 가져오기
+    api_key = os.environ.get("GEMINI_API_KEY")
+    
+    # 2. st.secrets에서 가져오기
+    if not api_key and hasattr(st, 'secrets') and "GEMINI_API_KEY" in st.secrets:
+        api_key = st.secrets["GEMINI_API_KEY"]
+    
+    return api_key
+
+# API 키 설정 (초기화 단계에서는 확인만)
+api_key = get_api_key()
 
 # --- Page Config ---
 st.set_page_config(page_title="Gemini Chatbot", layout="wide")
@@ -60,11 +70,15 @@ def apply_custom_css(dark_mode=False):
 
 # --- Helper functions ---
 def init_client():
-    api_key = st.secrets.get("GEMINI_API_KEY")
+    api_key = get_api_key()
     if not api_key:
-        st.error("⚠️ GEMINI_API_KEY 가 secrets.toml 에 설정되지 않았습니다.")
+        st.error("⚠️ GEMINI_API_KEY가 환경변수나 secrets.toml에 설정되지 않았습니다.")
+        st.info("API 키를 설정하는 방법: (1) 환경변수 GEMINI_API_KEY 설정 또는 (2) .streamlit/secrets.toml 파일에 GEMINI_API_KEY = '당신의_API_키' 추가")
         st.stop()
-    return genai.Client(api_key=api_key)
+    
+    # genai 라이브러리 설정
+    genai.configure(api_key=api_key)
+    return genai
 
 def append_history(role, text):
     st.session_state.history.append(
@@ -140,18 +154,17 @@ if send_btn and user_input.strip():
     client = init_client()
 
     try:
-        response = client.models.generate_content(
-            model=model,
-            contents=user_input,
-            config=types.GenerateContentConfig(
-                max_output_tokens=max_tokens,
-                temperature=temperature,
-            )
+        # genai 2.0 API 사용
+        model_obj = client.GenerativeModel(model)
+        response = model_obj.generate_content(
+            user_input,
+            generation_config={
+                "max_output_tokens": max_tokens,
+                "temperature": temperature,
+            }
         )
         text = safe_get_text_from_resp(response)
         append_history("assistant", text)
     except Exception as e:
         error_msg = f"❌ 오류 발생: {e}\n\n```\n{traceback.format_exc()}\n```"
-        append_history("assistant", error_msg)
-
-    st.rerun()
+        append_history("assistant", error_msg
