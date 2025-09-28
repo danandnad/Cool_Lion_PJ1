@@ -6,7 +6,8 @@ import datetime
 import json
 import os
 
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+api_key = os.environ.get("GEMINI_API_KEY") or st.secrets.get("GEMINI_API_KEY")
+genai.configure(api_key=api_key)
 
 # --- Page Config ---
 st.set_page_config(page_title="Gemini Chatbot", layout="wide")
