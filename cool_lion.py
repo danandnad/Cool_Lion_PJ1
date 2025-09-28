@@ -167,4 +167,4 @@ if send_btn and user_input.strip():
         append_history("assistant", text)
     except Exception as e:
         error_msg = f"❌ 오류 발생: {e}\n\n```\n{traceback.format_exc()}\n```"
-        append_history("assistant", error_msg
+        append_history("assistant", error_msg)
