@@ -4,10 +4,14 @@ import datetime
 import json
 import traceback
 from google import genai
-from google.generativeai.types import GenerationConfig # genai.types 대신 이걸 명시적으로 임포트
 
 # --- Page Config ---
 st.set_page_config(page_title="Gemini Chatbot", layout="wide")
+
+generation_config = {
+    "max_output_tokens": max_tokens,
+    "temperature": temperature
+}
 
 # --- Custom CSS (Light/Dark Mode 지원) ---
 def apply_custom_css(dark_mode=False):
