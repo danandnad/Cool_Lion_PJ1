@@ -4,6 +4,9 @@ from google.genai import types
 import traceback
 import datetime
 import json
+import os
+
+genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
 
 # --- Page Config ---
 st.set_page_config(page_title="Gemini Chatbot", layout="wide")
@@ -150,4 +153,4 @@ if send_btn and user_input.strip():
         error_msg = f"❌ 오류 발생: {e}\n\n```\n{traceback.format_exc()}\n```"
         append_history("assistant", error_msg)
 
-    st.experimental_rerun()
+    st.rerun()
